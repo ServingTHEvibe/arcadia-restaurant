@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Arcadia — Polk City, FL</title>
+<script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  body { font-family: 'Georgia', 'Times New Roman', serif; background: #0C0705; color: #F5EDD8; overflow-x: hidden; }
+
+  /* ── Animations ── */
+  @keyframes fadeUp   { from { opacity:0; transform:translateY(36px); } to { opacity:1; transform:translateY(0); } }
+  @keyframes fadeIn   { from { opacity:0; } to { opacity:1; } }
+  @keyframes drift    { 0%,100% { transform:rotate(-6deg) translateY(0px);   } 50% { transform:rotate(-4deg) translateY(-12px); } }
+  @keyframes driftB   { 0%,100% { transform:rotate(5deg)  translateY(-6px);  } 50% { transform:rotate(7deg)  translateY(8px);  } }
+  @keyframes driftC   { 0%,100% { transform:rotate(-3deg) translateY(4px);   } 50% { transform:rotate(-5deg) translateY(-10px); } }
+  @keyframes driftD   { 0%,100% { transform:rotate(8deg)  translateY(0px);   } 50% { transform:rotate(6deg)  translateY(-14px); } }
+  @keyframes shimmer  { from { background-position:-400px 0; } to { background-position:400px 0; } }
+  @keyframes marquee  { from { transform:translateX(0); } to { transform:translateX(-50%); } }
+  @keyframes pulseGlow{ 0%,100%{ box-shadow:0 0 30px rgba(200,151,58,0.18); } 50%{ box-shadow:0 0 60px rgba(200,151,58,0.35); } }
+  @keyframes slideInLeft { from { opacity:0; transform:translateX(-40px); } to { opacity:1; transform:translateX(0); } }
+  @keyframes slideInRight{ from { opacity:0; transform:translateX(40px);  } to { opacity:1; transform:translateX(0); } }
+  @keyframes scaleIn  { from { opacity:0; transform:scale(0.88); } to { opacity:1; transform:scale(1); } }
+
+  .fade-up   { opacity:0; transform:translateY(36px); transition:opacity .75s cubic-bezier(.22,1,.36,1), transform .75s cubic-bezier(.22,1,.36,1); }
+  .fade-up.in{ opacity:1; transform:translateY(0); }
+
+  /* ── Buttons ── */
+  .btn-gold {
+    display:inline-flex; align-items:center; gap:8px;
+    background:linear-gradient(135deg,#C8973A,#E8A830);
+    color:#0C0705; padding:.85rem 2.1rem; border-radius:4px;
+    font-family:sans-serif; font-size:.93rem; font-weight:700;
+    letter-spacing:.04em; text-transform:uppercase;
+    border:none; cursor:pointer; text-decoration:none;
+    transition:transform .2s ease, box-shadow .2s ease, filter .2s ease;
+    box-shadow:0 6px 28px rgba(200,151,58,0.32);
+  }
+  .btn-gold:hover { transform:translateY(-3px); filter:brightness(1.08); box-shadow:0 14px 40px rgba(200,151,58,0.48); }
+
+  .btn-outline {
+    display:inline-flex; align-items:center; gap:8px;
+    background:transparent; color:#C8973A;
+    padding:.82rem 2rem; border-radius:4px;
+    font-family:sans-serif; font-size:.93rem; font-weight:600;
+    letter-spacing:.04em; text-transform:uppercase;
+    border:1.5px solid rgba(200,151,58,0.5); cursor:pointer; text-decoration:none;
+    transition:all .22s ease;
+  }
+  .btn-outline:hover { background:rgba(200,151,58,0.08); border-color:#C8973A; color:#E8A830; }
+
+  /* ── Cards ── */
+  .card-dark {
+    background:#1A0F08; border:1px solid rgba(200,151,58,0.14);
+    border-radius:6px; transition:transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+  }
+  .card-dark:hover { transform:translateY(-5px); border-color:rgba(200,151,58,0.38); box-shadow:0 16px 48px rgba(0,0,0,0.4); }
+
+  /* ── Img placeholders ── */
+  .img-slot {
+    width:100%; background:#1A0F08; overflow:hidden; position:relative;
+    display:flex; align-items:center; justify-content:center;
+  }
+  .img-slot img { width:100%; height:100%; object-fit:cover; display:block; }
+
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width:5px; } ::-webkit-scrollbar-track { background:#0C0705; }
+  ::-webkit-scrollbar-thumb { background:#C8973A; border-radius:3px; }
+
+  /* ── Grain overlay ── */
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:999;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    opacity:.5;
+  }
+
+  /* ── Divider ── */
+  .divider { width:40px; height:2px; background:linear-gradient(90deg,#C8973A,transparent); margin:1rem 0 1.6rem; }
+
+  /* ── Nav link ── */
+  .nav-link { font-family:sans-serif; font-size:.83rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:#8B7A6A; text-decoration:none; transition:color .2s; }
+  .nav-link:hover { color:#C8973A; }
+
+  /* ── Section labels ── */
+  .label { font-family:sans-serif; font-size:.72rem; font-weight:700; letter-spacing:.2em; text-transform:uppercase; color:#C8973A; margin-bottom:.7rem; }
+  .section-title { font-size:clamp(2rem,4vw,3.2rem); font-weight:800; line-height:1.1; letter-spacing:-.02em; }
+
+  /* ── Hero parallax image ── */
+  .hero-img-wrap { position:relative; overflow:hidden; border-radius:8px; animation:pulseGlow 4s ease-in-out infinite; }
+  .hero-img-wrap::after { content:''; position:absolute; inset:0; background:linear-gradient(to bottom right, rgba(200,151,58,0.08), transparent); border-radius:8px; pointer-events:none; }
+
+  /* ── Marquee ── */
+  .marquee-inner { display:flex; gap:4rem; animation:marquee 28s linear infinite; will-change:transform; }
+
+  /* ── Testimonial quote ── */
+  .quote-mark { font-size:5rem; line-height:.8; color:#C8973A; opacity:.5; font-family:Georgia,serif; }
+
+  /* ── Gallery item ── */
+  .gallery-item { overflow:hidden; border-radius:6px; cursor:pointer; }
+  .gallery-item img { width:100%; height:100%; object-fit:cover; display:block; transition:transform .5s ease; }
+  .gallery-item:hover img { transform:scale(1.05); }
+
+  /* ── Pricing ── */
+  .plan-card { background:#140C06; border:1px solid rgba(200,151,58,0.16); border-radius:8px; padding:2.5rem 2rem; transition:all .3s ease; }
+  .plan-card:hover { border-color:rgba(200,151,58,0.4); }
+  .plan-featured { background:linear-gradient(160deg,#1E1208,#100A04); border-color:rgba(200,151,58,0.5); box-shadow:0 0 40px rgba(200,151,58,0.12); }
+
+  /* ── Form ── */
+  .field { width:100%; background:#1A0F08; border:1px solid rgba(200,151,58,0.2); border-radius:6px;
+           padding:.88rem 1.1rem; font-family:sans-serif; font-size:.93rem; color:#F5EDD8;
+           transition:border-color .2s, box-shadow .2s; outline:none; }
+  .field:focus { border-color:#C8973A; box-shadow:0 0 0 3px rgba(200,151,58,0.12); }
+  .field::placeholder { color:#4A3828; }
+
+  /* ── Footer ── */
+  .foot-link { font-family:sans-serif; font-size:.84rem; color:#5A4A3A; text-decoration:none; display:block; margin-bottom:.6rem; transition:color .2s; }
+  .foot-link:hover { color:#C8973A; }
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel">
+const { useState, useEffect, useRef } = React;
+
+/* ── Reveal hook ── */
+function useReveal(delay = 0) {
+  const ref = useRef(null);
+  const [vis, setVis] = useState(false);
+  useEffect(() => {
+    const obs = new IntersectionObserver(([e]) => { if (e.isIntersecting) setVis(true); }, { threshold: 0.1 });
+    if (ref.current) obs.observe(ref.current);
+    return () => obs.disconnect();
+  }, []);
+  return [ref, vis];
+}
+
+/* ── Image component with cinematic overlay ── */
+function CineImg({ src, alt, style, className, overlay = true }) {
+  return (
+    <div style={{ position:'relative', overflow:'hidden', ...style }} className={className}>
+      <img src={src} alt={alt} style={{ width:'100%', height:'100%', objectFit:'cover', display:'block' }} />
+      {overlay && <div style={{ position:'absolute', inset:0, background:'linear-gradient(to bottom, transparent 40%, rgba(12,7,5,0.55) 100%)', pointerEvents:'none' }} />}
+    </div>
+  );
+}
+
+/* ── Data ── */
+const FOOD_IMGS = [
+  'https://images.unsplash.com/photo-1546833999-b9f581a1996d?w=900&q=85&auto=format',
+  'https://images.unsplash.com/photo-1568901346375-23c9450c58cd?w=900&q=85&auto=format',
+  'https://images.unsplash.com/photo-1551024709-8f23befc6f87?w=900&q=85&auto=format',
+  'https://images.unsplash.com/photo-1544025162-d76694265947?w=900&q=85&auto=format',
+  'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?w=900&q=85&auto=format',
+  'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=900&q=85&auto=format',
+];
+
+const HERO_BG = 'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=1800&q=90&auto=format';
+const INTERIOR_IMG = 'https://images.unsplash.com/photo-1414235077428-338989a2e8c0?w=1200&q=85&auto=format';
+const EVENTS_IMG = 'https://images.unsplash.com/photo-1519671482749-fd09be7ccebf?w=1000&q=85&auto=format';
+
+const FEATURES = [
+  { n:'01', title:'Locally Sourced', desc:'We partner with Central Florida farms so every ingredient travels miles — not hundreds of miles — to reach your plate.' },
+  { n:'02', title:'Crafted From Scratch', desc:'No freezer bags. Our chefs prep everything fresh before the doors open. You taste the difference in every bite.' },
+  { n:'03', title:'Full Bar Program', desc:'House-crafted cocktails, Florida craft beers, and a curated wine list — each chosen to complement our seasonal menu.' },
+  { n:'04', title:'Private Events', desc:'From anniversaries to corporate dinners, our private room seats up to 40 guests in warmth and candlelight.' },
+  { n:'05', title:'Dog-Friendly Patio', desc:'Our shaded outdoor patio welcomes well-behaved dogs — fresh water bowls included, tail wags guaranteed.' },
+  { n:'06', title:'Order Online', desc:'Order ahead for pickup or delivery on DoorDash. Your meal is timed to be hot and perfect when you arrive.' },
+];
+
+const TESTIMONIALS = [
+  { name:'Maria González', role:'Polk City Local · 3-year regular', initials:'MG',
+    quote:'Arcadia has become our family's Sunday tradition. The food is unlike anything else in Central Florida, and the staff actually remembers our names. That small thing means everything.' },
+  { name:'James & Priya Thornton', role:'Anniversary dinner guests', initials:'JP',
+    quote:'We booked the private dining room for our anniversary and it was magical. The chef customized the entire tasting menu around Priya's dietary restrictions. Truly above and beyond.' },
+  { name:'Chef Marcus Webb', role:'TampaBayBites.com · Food critic', initials:'MW',
+    quote:'As someone who reviews restaurants professionally, Arcadia genuinely surprised me. The sourcing is transparent, the flavors are bold without being heavy, and the atmosphere is exceptional.' },
+];
+
+const PLANS = [
+  { name:'The Gathering', tag:null, price:'$18', unit:'/person',
+    desc:'Casual team lunches & small celebrations',
+    features:['Buffet-style service','Choice of 3 entrées','Garden salad + bread bar','Non-alcoholic beverages','Compostable servingware','Min. 15 guests'],
+    featured:false, cta:'Request a Quote' },
+  { name:'The Arcadia', tag:'Most Popular', price:'$36', unit:'/person',
+    desc:'Our signature experience for special events',
+    features:['Plated 3-course dinner','Choice of 5 entrées','Dedicated server & captain','Full bar access','Custom dessert or cake','Private dining room'],
+    featured:true, cta:'Book Now' },
+  { name:'Corporate Spread', tag:null, price:'$28', unit:'/person',
+    desc:'Fuel your team with honest, nourishing food',
+    features:['Breakfast or lunch service','Healthy & hearty options','All dietary accommodations','On-time delivery + setup','Recurring order discounts','Branded printed menus'],
+    featured:false, cta:'Request a Quote' },
+];
+
+const PLATFORMS = ['DoorDash','Uber Eats','Yelp','TripAdvisor','Google','OpenTable','Zagat','Eater FL'];
+const NAV = ['Menu','About','Catering','Events','Contact'];
+const FOOTER_COLS = [
+  { title:'Dine With Us', links:['Full Menu','Daily Specials','Wine & Bar','Reserve a Table'] },
+  { title:'Events',       links:['Private Dining','Catering','Corporate Events','Weddings & Receptions'] },
+  { title:'Company',      links:['Our Story','Meet the Team','Careers','Press & Media'] },
+];
+
+/* ── App ── */
+function App() {
+  const [scroll, setScroll]   = useState(0);
+  const [menuOpen, setMenu]   = useState(false);
+  const [form, setForm]       = useState({ name:'', email:'', message:'' });
+  const [sent, setSent]       = useState(false);
+  const [activeSlide, setSlide] = useState(0);
+
+  const [heroRef,    heroVis   ] = useReveal();
+  const [proofRef,   proofVis  ] = useReveal();
+  const [featRef,    featVis   ] = useReveal();
+  const [gallRef,    gallVis   ] = useReveal();
+  const [pricRef,    pricVis   ] = useReveal();
+  const [testiRef,   testiVis  ] = useReveal();
+  const [contactRef, contactVis] = useReveal();
+
+  useEffect(() => {
+    const fn = () => setScroll(window.scrollY);
+    window.addEventListener('scroll', fn);
+    return () => window.removeEventListener('scroll', fn);
+  }, []);
+
+  // Auto-advance testimonials
+  useEffect(() => {
+    const t = setInterval(() => setSlide(s => (s + 1) % TESTIMONIALS.length), 5500);
+    return () => clearInterval(t);
+  }, []);
+
+  const navSolid = scroll > 60;
+
+  return (
+    <>
+      {/* ════════════ NAVBAR ════════════ */}
+      <nav style={{
+        position:'fixed', top:0, left:0, right:0, zIndex:100,
+        background: navSolid ? 'rgba(12,7,5,0.92)' : 'transparent',
+        backdropFilter: navSolid ? 'blur(20px)' : 'none',
+        borderBottom: navSolid ? '1px solid rgba(200,151,58,0.12)' : 'none',
+        transition:'all .35s ease',
+      }}>
+        <div style={{ maxWidth:1200, margin:'0 auto', padding:'0 1.8rem', height:70, display:'flex', alignItems:'center', justifyContent:'space-between' }}>
+          {/* Logo */}
+          <div style={{ display:'flex', alignItems:'center', gap:10 }}>
+            <div style={{ width:34, height:34, borderRadius:'50%', border:'1.5px solid rgba(200,151,58,0.5)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+              <span style={{ color:'#C8973A', fontSize:14, fontWeight:700, letterSpacing:'.04em', fontFamily:'sans-serif' }}>A</span>
+            </div>
+            <span style={{ fontWeight:800, fontSize:'1.35rem', letterSpacing:'-.01em', color:'#F5EDD8' }}>ARCADIA</span>
+          </div>
+
+          {/* Desktop nav */}
+          <div className="hidden md:flex" style={{ alignItems:'center', gap:32 }}>
+            {NAV.map(l => <a key={l} href="#" className="nav-link">{l}</a>)}
+            <a href="#order" className="btn-gold" style={{ padding:'.6rem 1.5rem', fontSize:'.82rem' }}>Order Now</a>
+          </div>
+
+          {/* Mobile toggle */}
+          <button onClick={() => setMenu(!menuOpen)}
+            className="md:hidden"
+            style={{ background:'none', border:'1px solid rgba(200,151,58,0.3)', borderRadius:4, padding:'6px 12px', cursor:'pointer', color:'#C8973A', fontSize:18, lineHeight:1 }}>
+            {menuOpen ? '✕' : '☰'}
+          </button>
+        </div>
+
+        {menuOpen && (
+          <div style={{ background:'#100A04', borderTop:'1px solid rgba(200,151,58,0.12)', padding:'1.4rem 1.8rem' }}>
+            {NAV.map(l => (
+              <a key={l} href="#" className="foot-link" style={{ marginBottom:'.9rem', fontSize:'.9rem', color:'#8B7A6A' }}>{l}</a>
+            ))}
+            <a href="#order" className="btn-gold" style={{ marginTop:'.8rem', display:'inline-block' }}>Order Now</a>
+          </div>
+        )}
+      </nav>
+
+      {/* ════════════ HERO — Peno Lab "food-through-type" technique ════════════ */}
+      <section style={{ position:'relative', minHeight:'100vh', overflow:'hidden', background:'#F5EDD8' }}>
+
+        {/* ── Nav overlay needs light-mode treatment in hero ── */}
+
+        {/* ── LAYER 1: Huge background typography ── */}
+        <div style={{
+          position:'absolute', inset:0, zIndex:1,
+          display:'flex', flexDirection:'column',
+          alignItems:'center', justifyContent:'center',
+          userSelect:'none', pointerEvents:'none',
+          lineHeight:.82, overflow:'hidden',
+          padding:'0 1rem',
+        }}>
+          {/* Main display words — stacked poster style */}
+          <div style={{ fontFamily:'Georgia,serif', fontWeight:900, letterSpacing:'-.03em', textAlign:'center', color:'#2C1208' }}>
+            <div style={{ fontSize:'clamp(5rem,14vw,15rem)', lineHeight:.85 }}>FRESH</div>
+            <div style={{ fontSize:'clamp(5rem,14vw,15rem)', lineHeight:.85, color:'#8B3A14' }}>BOLD</div>
+            <div style={{ fontSize:'clamp(5rem,14vw,15rem)', lineHeight:.85 }}>ARCADIA</div>
+          </div>
+        </div>
+
+        {/* ── LAYER 2: Food image bursting through the text ── */}
+        <div style={{
+          position:'absolute', zIndex:3,
+          top:'50%', left:'50%',
+          transform:'translate(-50%, -52%)',
+          width:'clamp(320px,52vw,680px)',
+          aspectRatio:'1/1.05',
+          pointerEvents:'none',
+        }}>
+          {/* Drop shadow base */}
+          <div style={{
+            position:'absolute', bottom:'-6%', left:'10%', right:'10%', height:'15%',
+            background:'radial-gradient(ellipse, rgba(44,18,8,0.35) 0%, transparent 70%)',
+            filter:'blur(18px)',
+          }} />
+          <img
+            src={FOOD_IMGS[1]}
+            alt="Arcadia signature dish"
+            style={{
+              width:'100%', height:'100%', objectFit:'cover',
+              borderRadius:'50% 50% 48% 48% / 46% 46% 54% 54%',
+              filter:'drop-shadow(0 40px 80px rgba(44,18,8,0.45))',
+            }}
+          />
+        </div>
+
+        {/* ── LAYER 3: Rotating badge (top-right of food) ── */}
+        <div style={{
+          position:'absolute', zIndex:5,
+          top:'18%', left:'60%',
+          width:'clamp(80px,10vw,120px)', height:'clamp(80px,10vw,120px)',
+          animation:'spin-slow 12s linear infinite',
+        }}>
+          <svg viewBox="0 0 120 120" style={{ width:'100%', height:'100%' }}>
+            <defs>
+              <path id="circ" d="M 60,60 m -38,0 a 38,38 0 1,1 76,0 a 38,38 0 1,1 -76,0" />
+            </defs>
+            <circle cx="60" cy="60" r="56" fill="#C8973A" />
+            <circle cx="60" cy="60" r="44" fill="none" stroke="#0C0705" strokeWidth="1.2" strokeDasharray="3,3" />
+            <text style={{ fontFamily:'sans-serif', fontWeight:800, fontSize:11, letterSpacing:'2.5px' }} fill="#0C0705">
+              <textPath href="#circ">POLK CITY · FL · EST 2012 · POLK CITY · FL · EST 2012 ·</textPath>
+            </text>
+            <text x="60" y="56" textAnchor="middle" style={{ fontFamily:'Georgia,serif', fontWeight:900, fontSize:15 }} fill="#0C0705">FARM</text>
+            <text x="60" y="72" textAnchor="middle" style={{ fontFamily:'Georgia,serif', fontWeight:900, fontSize:15 }} fill="#0C0705">TABLE</text>
+          </svg>
+        </div>
+
+        {/* ── LAYER 4: Floating UI chips ── */}
+        {/* Rating pill — left */}
+        <div style={{
+          position:'absolute', zIndex:5, bottom:'30%', left:'6%',
+          background:'#0C0705', borderRadius:50,
+          padding:'.55rem 1.2rem', display:'flex', alignItems:'center', gap:8,
+          boxShadow:'0 8px 24px rgba(0,0,0,0.25)',
+          animation:'driftB 6s ease-in-out infinite',
+        }}>
+          <div style={{ width:32, height:32, borderRadius:'50%', background:'#C8973A', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0 }}>
+            <span style={{ fontSize:15 }}>★</span>
+          </div>
+          <div>
+            <div style={{ fontFamily:'sans-serif', fontSize:'.82rem', fontWeight:800, color:'#F5EDD8', lineHeight:1 }}>4.9 / 5.0</div>
+            <div style={{ fontFamily:'sans-serif', fontSize:'.65rem', color:'#5A4A3A', marginTop:2 }}>850+ Reviews</div>
+          </div>
+        </div>
+
+        {/* Chef's pick card — right */}
+        <div style={{
+          position:'absolute', zIndex:5, top:'32%', right:'5%',
+          background:'#0C0705', borderRadius:12,
+          padding:'.8rem 1rem', minWidth:160,
+          boxShadow:'0 12px 32px rgba(0,0,0,0.3)',
+          animation:'drift 7s ease-in-out infinite 1s',
+        }}>
+          <div style={{ fontFamily:'sans-serif', fontSize:'.62rem', color:'#C8973A', letterSpacing:'.12em', textTransform:'uppercase', marginBottom:6 }}>Tonight's Feature</div>
+          <div style={{ width:'100%', height:80, borderRadius:8, overflow:'hidden', marginBottom:8 }}>
+            <img src={FOOD_IMGS[0]} alt="Feature dish" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+          </div>
+          <div style={{ fontFamily:'sans-serif', fontSize:'.82rem', fontWeight:700, color:'#F5EDD8' }}>Duck Breast</div>
+          <div style={{ fontFamily:'sans-serif', fontSize:'.72rem', color:'#C8973A', marginTop:2 }}>$34 · Chef's Pick</div>
+        </div>
+
+        {/* Open now badge — lower right */}
+        <div style={{
+          position:'absolute', zIndex:5, bottom:'22%', right:'8%',
+          background:'#8B3A14', borderRadius:50,
+          padding:'.45rem 1.1rem',
+          boxShadow:'0 6px 20px rgba(139,58,20,0.4)',
+          animation:'driftC 8s ease-in-out infinite 2s',
+        }}>
+          <span style={{ fontFamily:'sans-serif', fontSize:'.76rem', fontWeight:800, color:'#F5EDD8', letterSpacing:'.06em' }}>● OPEN NOW</span>
+        </div>
+
+        {/* ── LAYER 5: Bottom CTA bar ── */}
+        <div style={{
+          position:'absolute', bottom:0, left:0, right:0, zIndex:6,
+          background:'#C8973A',
+          display:'flex', flexWrap:'wrap', alignItems:'center', justifyContent:'space-between',
+          padding:'1.2rem 2.5rem', gap:'1rem',
+        }}>
+          <div style={{ display:'flex', gap:'2.5rem', flexWrap:'wrap' }}>
+            {[['4.9★','Google Rating'],['850+','Reviews'],['12yr','In Business']].map(([v,l],i)=>(
+              <div key={i} style={{ display:'flex', alignItems:'baseline', gap:6 }}>
+                <span style={{ fontFamily:'Georgia,serif', fontSize:'1.4rem', fontWeight:900, color:'#0C0705' }}>{v}</span>
+                <span style={{ fontFamily:'sans-serif', fontSize:'.7rem', fontWeight:600, color:'rgba(12,7,5,0.6)', textTransform:'uppercase', letterSpacing:'.06em' }}>{l}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{ display:'flex', gap:'1rem', flexWrap:'wrap', alignItems:'center' }}>
+            <a href="#order" id="order"
+              style={{ background:'#0C0705', color:'#C8973A', padding:'.7rem 1.8rem', borderRadius:4, fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:800, textDecoration:'none', letterSpacing:'.06em', textTransform:'uppercase', transition:'all .2s' }}
+              onMouseEnter={e=>e.target.style.background='#2C1208'}
+              onMouseLeave={e=>e.target.style.background='#0C0705'}
+            >Order Now</a>
+            <a href="#menu"
+              style={{ color:'#0C0705', fontFamily:'sans-serif', fontSize:'.88rem', fontWeight:700, textDecoration:'none', letterSpacing:'.04em', textTransform:'uppercase', borderBottom:'2px solid rgba(12,7,5,0.3)', paddingBottom:2 }}
+            >View Menu →</a>
+          </div>
+        </div>
+
+        {/* ── ref anchor for reveal ── */}
+        <div ref={heroRef} style={{ position:'absolute', top:'40%', left:0, pointerEvents:'none' }} />
+      </section>
+
+      {/* ════════════ MARQUEE (Social Proof) ════════════ */}
+      <section ref={proofRef} style={{ background:'#100A04', borderTop:'1px solid rgba(200,151,58,0.1)', borderBottom:'1px solid rgba(200,151,58,0.1)', padding:'1.6rem 0', overflow:'hidden' }}>
+        <div style={{ display:'flex', overflow:'hidden' }}>
+          <div className="marquee-inner" style={{ whiteSpace:'nowrap' }}>
+            {[...PLATFORMS,...PLATFORMS].map((p,i) => (
+              <div key={i} style={{ display:'inline-flex', alignItems:'center', gap:'1rem' }}>
+                <span style={{ fontFamily:'sans-serif', fontSize:'.8rem', fontWeight:700, letterSpacing:'.14em', textTransform:'uppercase', color:'#3A2A1A' }}>✦</span>
+                <span style={{ fontFamily:'sans-serif', fontSize:'.85rem', fontWeight:600, letterSpacing:'.08em', color:'#5A4A3A' }}>{p}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════ FEATURES ════════════ */}
+      <section ref={featRef} style={{ padding:'6rem 1.8rem', background:'#0C0705' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto' }}>
+          <div className={`fade-up${featVis?' in':''}`} style={{ maxWidth:500, marginBottom:'4rem' }}>
+            <div className="label">Why Arcadia</div>
+            <h2 className="section-title">More Than<br />a Meal</h2>
+            <div className="divider" />
+            <p style={{ fontFamily:'sans-serif', color:'#5A4A3A', fontSize:'1rem', lineHeight:1.8 }}>
+              From first bite to last sip, every detail is looked after so you can focus on the people you're with.
+            </p>
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:'1px', border:'1px solid rgba(200,151,58,0.1)', borderRadius:8, overflow:'hidden' }}>
+            {FEATURES.map((f, i) => (
+              <div key={f.n}
+                className={`fade-up${featVis?' in':''}`}
+                style={{
+                  background:'#100A04', padding:'2.2rem 1.8rem',
+                  borderRight:'1px solid rgba(200,151,58,0.08)',
+                  borderBottom:'1px solid rgba(200,151,58,0.08)',
+                  transition:'background .3s',
+                  transitionDelay:`${i * 0.08}s`,
+                }}
+                onMouseEnter={e => e.currentTarget.style.background='#1A0F08'}
+                onMouseLeave={e => e.currentTarget.style.background='#100A04'}
+              >
+                <div style={{ fontFamily:'sans-serif', fontSize:'.7rem', fontWeight:700, letterSpacing:'.12em', color:'rgba(200,151,58,0.4)', marginBottom:'1.2rem' }}>{f.n}</div>
+                <h3 style={{ fontSize:'1.05rem', fontWeight:700, color:'#F5EDD8', marginBottom:'.6rem' }}>{f.title}</h3>
+                <p style={{ fontFamily:'sans-serif', color:'#4A3828', fontSize:'.87rem', lineHeight:1.75 }}>{f.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════ GALLERY / ATMOSPHERE ════════════ */}
+      <section ref={gallRef} style={{ padding:'2rem 1.8rem 6rem', background:'#0C0705' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto' }}>
+          <div className={`fade-up${gallVis?' in':''}`} style={{ display:'flex', justifyContent:'space-between', alignItems:'flex-end', marginBottom:'2rem', flexWrap:'wrap', gap:'1rem' }}>
+            <div>
+              <div className="label">The Experience</div>
+              <h2 className="section-title" style={{ fontSize:'clamp(1.8rem,3.5vw,2.8rem)' }}>Come for the Food.<br />Stay for the Feeling.</h2>
+            </div>
+            <a href="#" className="btn-outline" style={{ flexShrink:0 }}>See Full Gallery</a>
+          </div>
+
+          {/* Gallery grid */}
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(3,1fr)', gridTemplateRows:'240px 240px', gap:8 }}>
+            <div className="gallery-item" style={{ gridColumn:'1/2', gridRow:'1/3' }}>
+              <img src={INTERIOR_IMG} alt="Arcadia interior at night" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            </div>
+            <div className="gallery-item">
+              <img src={FOOD_IMGS[2]} alt="Craft cocktail" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            </div>
+            <div className="gallery-item">
+              <img src={FOOD_IMGS[4]} alt="Plated dish" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            </div>
+            <div className="gallery-item">
+              <img src={FOOD_IMGS[5]} alt="Arcadia dinner" style={{ width:'100%', height:'100%', objectFit:'cover' }} />
+            </div>
+            <div className="gallery-item" style={{ position:'relative' }}>
+              <img src={EVENTS_IMG} alt="Private event" style={{ width:'100%', height:'100%', objectFit:'cover', opacity:.7 }} />
+              <div style={{ position:'absolute', inset:0, display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', background:'rgba(12,7,5,0.55)' }}>
+                <div style={{ fontFamily:'sans-serif', fontSize:'.72rem', letterSpacing:'.15em', textTransform:'uppercase', color:'#C8973A', marginBottom:6 }}>Private Events</div>
+                <div style={{ fontSize:'1.1rem', fontWeight:700, color:'#F5EDD8', textAlign:'center' }}>Your Moment,<br/>Our Stage</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════ PRICING / CATERING ════════════ */}
+      <section ref={pricRef} style={{ padding:'6rem 1.8rem', background:'#100A04', borderTop:'1px solid rgba(200,151,58,0.1)' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto' }}>
+          <div className={`fade-up${pricVis?' in':''}`} style={{ textAlign:'center', marginBottom:'3.5rem' }}>
+            <div className="label" style={{ justifyContent:'center', display:'flex' }}>Catering &amp; Events</div>
+            <h2 className="section-title">Feed Your People Well</h2>
+            <div className="divider" style={{ margin:'1rem auto 1.6rem' }} />
+            <p style={{ fontFamily:'sans-serif', color:'#5A4A3A', fontSize:'1rem', maxWidth:460, margin:'0 auto', lineHeight:1.8 }}>
+              Whether it's 20 or 200, we make sure every guest leaves satisfied — and talking about it the next day.
+            </p>
+          </div>
+
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(280px,1fr))', gap:'1.2rem', alignItems:'start' }}>
+            {PLANS.map((plan, i) => (
+              <div key={plan.name}
+                className={`plan-card${plan.featured?' plan-featured':''} fade-up${pricVis?' in':''}`}
+                style={{ position:'relative', transitionDelay:`${i * 0.12}s` }}
+              >
+                {plan.tag && (
+                  <div style={{ position:'absolute', top:-12, left:'50%', transform:'translateX(-50%)', background:'#C8973A', color:'#0C0705', fontFamily:'sans-serif', fontSize:'.7rem', fontWeight:700, letterSpacing:'.1em', textTransform:'uppercase', padding:'.25rem 1rem', borderRadius:3 }}>
+                    {plan.tag}
+                  </div>
+                )}
+
+                <div className="label" style={{ marginBottom:'1rem' }}>{plan.name}</div>
+                <p style={{ fontFamily:'sans-serif', fontSize:'.82rem', color:'#4A3828', marginBottom:'1.4rem', lineHeight:1.6 }}>{plan.desc}</p>
+
+                <div style={{ marginBottom:'1.8rem' }}>
+                  <span style={{ fontSize:'2.6rem', fontWeight:900, color: plan.featured?'#C8973A':'#F5EDD8' }}>{plan.price}</span>
+                  <span style={{ fontFamily:'sans-serif', fontSize:'.85rem', color:'#4A3828', marginLeft:4 }}>{plan.unit}</span>
+                </div>
+
+                <ul style={{ listStyle:'none', marginBottom:'2rem' }}>
+                  {plan.features.map(f => (
+                    <li key={f} style={{ fontFamily:'sans-serif', fontSize:'.85rem', color:'#5A4A3A', padding:'.5rem 0', borderBottom:'1px solid rgba(200,151,58,0.07)', display:'flex', alignItems:'center', gap:10 }}>
+                      <span style={{ color:'#C8973A', fontWeight:700, fontSize:'.8rem' }}>✦</span>{f}
+                    </li>
+                  ))}
+                </ul>
+
+                <button
+                  className={plan.featured ? 'btn-gold' : 'btn-outline'}
+                  style={{ width:'100%', justifyContent:'center' }}
+                >
+                  {plan.cta}
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════ TESTIMONIALS ════════════ */}
+      <section ref={testiRef} style={{ padding:'6rem 1.8rem', background:'#0C0705', position:'relative', overflow:'hidden' }}>
+        {/* Ambient bg */}
+        <div style={{ position:'absolute', top:'50%', left:'50%', transform:'translate(-50%,-50%)', width:600, height:400, borderRadius:'50%', background:'radial-gradient(ellipse, rgba(200,151,58,0.05) 0%, transparent 70%)', pointerEvents:'none' }} />
+
+        <div style={{ maxWidth:900, margin:'0 auto', position:'relative', zIndex:1 }}>
+          <div className={`fade-up${testiVis?' in':''}`} style={{ textAlign:'center', marginBottom:'3.5rem' }}>
+            <div className="label" style={{ justifyContent:'center', display:'flex' }}>Testimonials</div>
+            <h2 className="section-title">Words From<br />Our Table</h2>
+          </div>
+
+          {/* Active testimonial */}
+          <div className={`fade-up${testiVis?' in':''}`} style={{ background:'#100A04', border:'1px solid rgba(200,151,58,0.15)', borderRadius:8, padding:'3rem', marginBottom:'2rem', minHeight:260, transition:'all .5s ease' }}>
+            <div className="quote-mark">"</div>
+            <p style={{ fontFamily:'Georgia,serif', fontSize:'1.15rem', color:'#D4C4A8', lineHeight:1.85, fontStyle:'italic', margin:'1rem 0 2rem' }}>
+              {TESTIMONIALS[activeSlide].quote}
+            </p>
+            <div style={{ display:'flex', alignItems:'center', gap:14 }}>
+              <div style={{ width:48, height:48, borderRadius:'50%', background:'linear-gradient(135deg,#C8973A,#8B5E3C)', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'sans-serif', fontWeight:700, fontSize:'.85rem', color:'#0C0705', flexShrink:0 }}>
+                {TESTIMONIALS[activeSlide].initials}
+              </div>
+              <div>
+                <div style={{ fontWeight:700, fontSize:'.95rem', color:'#F5EDD8' }}>{TESTIMONIALS[activeSlide].name}</div>
+                <div style={{ fontFamily:'sans-serif', fontSize:'.75rem', color:'#4A3828', marginTop:2 }}>{TESTIMONIALS[activeSlide].role}</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Dots */}
+          <div style={{ display:'flex', justifyContent:'center', gap:10 }}>
+            {TESTIMONIALS.map((_,i) => (
+              <button key={i} onClick={() => setSlide(i)}
+                style={{ width: i===activeSlide?28:8, height:8, borderRadius:4, border:'none', cursor:'pointer', background: i===activeSlide?'#C8973A':'rgba(200,151,58,0.25)', transition:'all .3s ease', padding:0 }}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════ CONTACT ════════════ */}
+      <section ref={contactRef} style={{ padding:'6rem 1.8rem', background:'#100A04', borderTop:'1px solid rgba(200,151,58,0.1)' }}>
+        <div style={{ maxWidth:1100, margin:'0 auto', display:'flex', flexWrap:'wrap', gap:'5rem' }}>
+          {/* Left */}
+          <div className={`fade-up${contactVis?' in':''}`} style={{ flex:'1 1 280px' }}>
+            <div className="label">Come Find Us</div>
+            <h2 className="section-title" style={{ fontSize:'clamp(1.8rem,3.5vw,2.8rem)' }}>Let's Make<br />a Reservation</h2>
+            <div className="divider" />
+            <div style={{ fontFamily:'sans-serif', fontSize:'.88rem', color:'#5A4A3A', lineHeight:2 }}>
+              <div style={{ marginBottom:'1.5rem' }}>
+                <div style={{ color:'#C8973A', fontSize:'.72rem', letterSpacing:'.14em', textTransform:'uppercase', marginBottom:4 }}>Address</div>
+                <div>100 County Road 33A<br />Polk City, FL 33868</div>
+              </div>
+              <div style={{ marginBottom:'1.5rem' }}>
+                <div style={{ color:'#C8973A', fontSize:'.72rem', letterSpacing:'.14em', textTransform:'uppercase', marginBottom:4 }}>Hours</div>
+                <div>Tue–Thu: 11am – 9pm<br />Fri–Sat: 11am – 10pm<br />Sunday: 10am – 8pm</div>
+              </div>
+              <div>
+                <div style={{ color:'#C8973A', fontSize:'.72rem', letterSpacing:'.14em', textTransform:'uppercase', marginBottom:4 }}>Phone</div>
+                <div>(863) 555-0194</div>
+              </div>
+            </div>
+          </div>
+
+          {/* Form */}
+          <div className={`fade-up${contactVis?' in':''}`} style={{ flex:'2 1 380px', transitionDelay:'.18s' }}>
+            {sent ? (
+              <div style={{ background:'#1A0F08', border:'1px solid rgba(200,151,58,0.2)', borderRadius:8, padding:'3rem', textAlign:'center' }}>
+                <div style={{ fontSize:'3rem', marginBottom:'1rem' }}>🥂</div>
+                <h3 style={{ fontSize:'1.4rem', fontWeight:700, color:'#F5EDD8', marginBottom:'.5rem' }}>Message Received!</h3>
+                <p style={{ fontFamily:'sans-serif', color:'#5A4A3A', fontSize:'.9rem', lineHeight:1.7 }}>We'll be in touch within a few hours. Looking forward to seeing you at Arcadia.</p>
+                <button onClick={() => setSent(false)} className="btn-outline" style={{ marginTop:'1.5rem' }}>Send Another</button>
+              </div>
+            ) : (
+              <form onSubmit={e => { e.preventDefault(); setSent(true); setForm({name:'',email:'',message:''}); }}>
+                <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:'1rem', marginBottom:'1rem' }}>
+                  {[{l:'Your Name',id:'name',t:'text',ph:'Maria González'},{l:'Email Address',id:'email',t:'email',ph:'maria@email.com'}].map(({l,id,t,ph}) => (
+                    <div key={id}>
+                      <label style={{ display:'block', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:600, letterSpacing:'.08em', textTransform:'uppercase', color:'#4A3828', marginBottom:'.45rem' }}>{l}</label>
+                      <input type={t} required placeholder={ph} value={form[id]}
+                        onChange={e => setForm({...form,[id]:e.target.value})}
+                        className="field" />
+                    </div>
+                  ))}
+                </div>
+                <div style={{ marginBottom:'1.5rem' }}>
+                  <label style={{ display:'block', fontFamily:'sans-serif', fontSize:'.78rem', fontWeight:600, letterSpacing:'.08em', textTransform:'uppercase', color:'#4A3828', marginBottom:'.45rem' }}>Message</label>
+                  <textarea required rows={5} placeholder="Hi Arcadia! I'd love to make a reservation for Saturday evening, party of 4..." value={form.message}
+                    onChange={e => setForm({...form,message:e.target.value})}
+                    className="field" style={{ resize:'vertical' }} />
+                </div>
+                <button type="submit" className="btn-gold">Send Message ↗</button>
+              </form>
+            )}
+          </div>
+        </div>
+
+        {/* Bottom CTA banner */}
+        <div style={{ maxWidth:1100, margin:'5rem auto 0', padding:'3rem', background:'linear-gradient(135deg,#1A0F08,#221508)', border:'1px solid rgba(200,151,58,0.2)', borderRadius:8, display:'flex', flexWrap:'wrap', justifyContent:'space-between', alignItems:'center', gap:'1.5rem' }}>
+          <div>
+            <div style={{ fontSize:'1.5rem', fontWeight:800, color:'#F5EDD8', marginBottom:'.3rem' }}>Ready to taste the difference?</div>
+            <div style={{ fontFamily:'sans-serif', color:'#5A4A3A', fontSize:'.9rem' }}>Order online or visit us at 100 County Road 33A, Polk City, FL</div>
+          </div>
+          <a href="#order" className="btn-gold" style={{ flexShrink:0 }}>Order Now</a>
+        </div>
+      </section>
+
+      {/* ════════════ FOOTER ════════════ */}
+      <footer style={{ background:'#080503', borderTop:'1px solid rgba(200,151,58,0.1)', padding:'4rem 1.8rem 2rem' }}>
+        <div style={{ maxWidth:1200, margin:'0 auto' }}>
+          <div style={{ display:'grid', gridTemplateColumns:'repeat(auto-fit,minmax(180px,1fr))', gap:'2.5rem 2rem', marginBottom:'3.5rem' }}>
+            {/* Brand */}
+            <div>
+              <div style={{ display:'flex', alignItems:'center', gap:10, marginBottom:'1.1rem' }}>
+                <div style={{ width:30, height:30, borderRadius:'50%', border:'1.5px solid rgba(200,151,58,0.4)', display:'flex', alignItems:'center', justifyContent:'center' }}>
+                  <span style={{ color:'#C8973A', fontSize:12, fontWeight:700, fontFamily:'sans-serif' }}>A</span>
+                </div>
+                <span style={{ fontWeight:800, fontSize:'1.2rem', letterSpacing:'-.01em', color:'#F5EDD8' }}>ARCADIA</span>
+              </div>
+              <p style={{ fontFamily:'sans-serif', fontSize:'.83rem', color:'#3A2A1A', lineHeight:1.8, marginBottom:'1.4rem', maxWidth:200 }}>
+                A neighborhood restaurant rooted in Central Florida. Real food, every day.
+              </p>
+              <div style={{ display:'flex', gap:8 }}>
+                {['f','ig','tw','yt'].map((s,i) => (
+                  <div key={i} style={{ width:32, height:32, borderRadius:4, border:'1px solid rgba(200,151,58,0.15)', display:'flex', alignItems:'center', justifyContent:'center', cursor:'pointer', transition:'border-color .2s', fontFamily:'sans-serif', fontSize:'.7rem', fontWeight:700, color:'#3A2A1A' }}
+                    onMouseEnter={e => { e.currentTarget.style.borderColor='rgba(200,151,58,0.5)'; e.currentTarget.style.color='#C8973A'; }}
+                    onMouseLeave={e => { e.currentTarget.style.borderColor='rgba(200,151,58,0.15)'; e.currentTarget.style.color='#3A2A1A'; }}
+                  >{s.toUpperCase()}</div>
+                ))}
+              </div>
+            </div>
+
+            {FOOTER_COLS.map(col => (
+              <div key={col.title}>
+                <div className="label" style={{ marginBottom:'1rem' }}>{col.title}</div>
+                {col.links.map(l => <a key={l} href="#" className="foot-link">{l}</a>)}
+              </div>
+            ))}
+          </div>
+
+          <div style={{ borderTop:'1px solid rgba(200,151,58,0.07)', paddingTop:'2rem', fontFamily:'sans-serif', fontSize:'.78rem', color:'#2A1A0A', display:'flex', flexWrap:'wrap', justifyContent:'space-between', gap:'0.5rem' }}>
+            <span>© 2026 Arcadia Restaurant · 100 County Road 33A, Polk City, FL 33868</span>
+            <span>Privacy · Terms · Accessibility</span>
+          </div>
+        </div>
+      </footer>
+    </>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
